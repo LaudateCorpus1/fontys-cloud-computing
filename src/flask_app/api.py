@@ -3,6 +3,7 @@ import os
 
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
+from flask_cors import CORS
 
 from flask_app.auth import requires_auth
 from worker.tasks import process_vote
@@ -53,6 +54,10 @@ api = Api(app)
 
 api.add_resource(Vote, '/vote')
 api.add_resource(Dashboard, '/dashboard')
+
+CORS(app,
+     resources={r"/*": {"origins": "*"}},
+     supports_credentials=True)  # http://stackoverflow.com/questions/3342140/cross-domain-cookies
 
 if __name__ == '__main__':
     app.run(debug=True)
