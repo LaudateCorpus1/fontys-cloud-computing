@@ -10,7 +10,7 @@ from common.utils import get_tasks_in_queue, db_cursor
 
 vote_parser = reqparse.RequestParser()
 vote_parser.add_argument('user_id', required=True, location="json")
-vote_parser.add_argument('vote', type=bool, required=True, location="json")
+vote_parser.add_argument('vote', required=True, location="json")
 
 
 class Vote(Resource):
