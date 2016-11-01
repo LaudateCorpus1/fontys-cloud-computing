@@ -1,5 +1,5 @@
 import time
-import environ
+import os
 
 from worker.celery_app import get_celery_app
 from common.utils import db_cursor
