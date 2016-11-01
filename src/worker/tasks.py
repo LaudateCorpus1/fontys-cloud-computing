@@ -19,7 +19,7 @@ def process_vote(user_id, update_dt, vote):
       INSERT INTO votes(user_id, last_update, vote) VALUES(%(user_id)s, %(update_dt)s, %(vote)s)
       ON CONFLICT(user_id)
       DO UPDATE SET (vote, last_update) = (%(vote)s, %(update_dt)s)
-      WHERE user_id = %(user_id)s
+      WHERE votes.user_id = %(user_id)s
     """
 
     with db_cursor() as cursor:
