@@ -1,5 +1,5 @@
 import psycopg2
-
+import os
 from contextlib import contextmanager
 
 import requests
@@ -55,7 +55,20 @@ def get_tasks_in_queue(amqp_url, queue_name='celery'):
 
 @contextmanager
 def db_cursor():
-    connection = psycopg2.connect()
+    result = urlparse(os.environ['DATABASE_URL'])
+    username = result.username
+    password = result.password
+    database = result.path[1:]
+    hostname = result.hostname
+    port = result.port
+    connection = psycopg2.connect(
+        database=database,
+        user=username,
+        password=password,
+        host=hostname,
+        port=port
+    )
+
     cursor = connection.cursor()
     try:
         yield cursor

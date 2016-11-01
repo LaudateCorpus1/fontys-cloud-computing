@@ -6,7 +6,7 @@ from flask_restful import Resource, Api, reqparse
 
 from flask_app.auth import requires_auth
 from worker.tasks import process_vote
-from common.utils import get_tasks_in_queue
+from common.utils import get_tasks_in_queue, db_cursor
 
 vote_parser = reqparse.RequestParser()
 vote_parser.add_argument('user_id', required=True, location="json")
@@ -28,9 +28,21 @@ class Dashboard(Resource):
     decorators = [requires_auth]
 
     def get(self):
+        with db_cursor() as cursor:
+            cursor.execute("""
+            SELECT
+              SUM(CAST(vote=1 as integer)) as up_votes,
+              SUM(CAST(vote=-1 as integer)) as down_votes
+            FROM
+              votes
+            WHERE
+              last_update >= NOW() - INTERVAL '15 minutes'
+              """)
+            votes_up, votes_down = cursor.fetchone()
+
         status = dict(
-            votes_up=1,
-            votes_down=1,
+            votes_up=votes_up,
+            votes_down=votes_down,
             queue_depth=get_tasks_in_queue(os.environ['AMQP_URL'])
         )
         return status
