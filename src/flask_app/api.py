@@ -31,8 +31,8 @@ class Dashboard(Resource):
         with db_cursor() as cursor:
             cursor.execute("""
             SELECT
-              SUM(CAST(vote=1 as integer)) as up_votes,
-              SUM(CAST(vote=-1 as integer)) as down_votes
+              coalesce(SUM(CAST(vote=1 as integer)), 0) as up_votes,
+              coalesce(SUM(CAST(vote=-1 as integer)), 0) as down_votes
             FROM
               votes
             WHERE
