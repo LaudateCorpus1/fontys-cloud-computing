@@ -1,9 +1,12 @@
 import time
+import environ
 
 from worker.celery_app import get_celery_app
 from common.utils import db_cursor
 
 app = get_celery_app()
+
+task_delay = int(os.environ.get('TASK_DELAY', '10'))
 
 """
 CREATE TABLE votes
@@ -19,7 +22,7 @@ CREATE TABLE votes
 def process_vote(user_id, update_dt, vote):
 
     # Simulate heavy processing
-    time.sleep(1)
+    time.sleep(task_delay)
 
     query = """
       INSERT INTO votes(user_id, last_update, vote) VALUES(%(user_id)s, %(update_dt)s, %(vote)s)
