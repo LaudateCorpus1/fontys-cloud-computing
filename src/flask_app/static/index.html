@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Vote</title>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<style>	
+	/* general */
+		body{
+			color:white;
+			height: 100vh;
+			background-size:contain;
+			position:relative;
+		}
+		.logo{
+			margin: 0 auto;
+			display: inherit;
+		}
+		.content{
+			height: 54vh;
+		}
+		.content h1{
+			margin-top:0;
+		}
+		.content h3{
+			font-size: 25vw;
+		}
+		.bottom{
+			height: 24vh;
+			background: rgba(0,0,0,0.35);
+	    	padding: 1px 10px;
+		}
+	/* landscape */
+		.landscape{
+			background: url(landscape.jpg) center center no-repeat;
+			
+		}
+		.landscape .logo{
+			float:right;
+		}
+		.landscape .content h3{
+			font-size: 11vw;
+		}
+
+	/* portrait */	
+		.portrait{
+			background: url(portrait.jpg) center center no-repeat;
+		}
+		.portrait .payoff{
+			color:#4a2286;
+		}
+
+	</style>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body id="body" class="container portrait">
+  	<img class="logo" src="http://www.greenhousegroup.com/Content/images/ghg-logo-280-wide.png">
+    <div class="content">
+	    <h1>Cast your vote</h1>
+	    <h5 class="payoff">By changing your device orientation</h5>
+    	<h3><span id="orientation">Portrait</span> Mode</h3>
+    </div>
+	<div class="bottom">    
+		<h5>Send to server every: <span id="intervalTime"></span></h5>
+		<button class="btn btn-primary" onclick="changeIntervalTime()">Change send to server time</button>
+		<p>Portaits : <strong id="countPortraits">0</strong><br/> Landscapes: <strong id="countLandscapes">0</strong><br/>
+			Total submitted: <strong id="countPosts">0</strong></br>
+		<small>Your Guid: <span id="guid"></span></small> </p>
+	</div>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script>
+
+		// cookie shit  1/2
+		function setCookie(cname, cvalue, exdays) {
+		    var d = new Date();
+		    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+		    var expires = "expires="+d.toUTCString();
+		    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+		}
+
+		// cookie shit  2/2
+		function getCookie(cname) {
+		    var name = cname + "=";
+		    var ca = document.cookie.split(';');
+		    for(var i = 0; i < ca.length; i++) {
+		        var c = ca[i];
+		        while (c.charAt(0) == ' ') {
+		            c = c.substring(1);
+		        }
+		        if (c.indexOf(name) == 0) {
+		            return c.substring(name.length, c.length);
+		        }
+		    }
+		    return "";
+		}
+
+		function generateUUID(){
+			// check if in cookie
+			var cookieUUID = getCookie("uuid");
+		    if (cookieUUID != "") {
+		        return cookieUUID;
+		    } else { // generate and write to cookie
+				var d = new Date().getTime();
+				if(window.performance && typeof window.performance.now === "function"){
+					d += performance.now(); //use high-precision timer if available
+				}
+				var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+					var r = (d + Math.random()*16)%16 | 0;
+					d = Math.floor(d/16);
+					return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+				});
+
+				setCookie("uuid", uuid, 365);
+		    
+				return uuid;
+			}
+		}
+
+		function setOrientation(angle){	
+			if (angle == 90) { // landscape
+				var classes = document.getElementById('body').classList;
+				classes.remove('portrait');
+				classes.add('landscape');
+				document.getElementById('orientation').innerHTML = 'Landscape';	
+			}
+			else{ //portrait
+				var classes = document.getElementById('body').classList;
+			    classes.add('portrait');
+				classes.remove('landscape');
+			    document.getElementById('orientation').innerHTML = 'Portrait';	
+			}
+		}
+
+
+		// the FE changes this between 
+		function changeIntervalTime(){
+			clearInterval(intervalTime);
+			if(intervalTime == 1000 || intervalTime == 100)
+			{
+				intervalTime = intervalTime/10	
+			}
+			else{
+				intervalTime = 1000
+			}
+			document.getElementById('intervalTime').innerHTML = '' + intervalTime/1000 + ' seconds' ;	
+			sendData(intervalTime);
+		}
+
+		function getCurrentMode(){
+			var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+			var height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
+
+			var isLandscapeMode = width > height;
+				if(isLandscapeMode){
+					return 'landscape'; // or something else
+				}else{
+					return 'portrait';
+				}
+		}
+		// set some dirty vars
+		var sendPeriodic;			// #ID needed for stopping/starting the setInterval when update
+		var numberOfPosts = 0;		// needed in the UI
+		var detailedNumbers = {
+			'landscape':0,
+			'portrait':0
+		};	// split submits
+		var guid = generateUUID();	// Generate it once and set cookie
+		var intervalTime = 123456;	// Start with a second, so pass an invalid number :)
+		// end of vars
+
+		function sendData(interval){
+			// stop the former interval
+			clearInterval(sendPeriodic);
+			// Start new with sending
+			 sendPeriodic = setInterval(
+			 	function(){ sendDataToServer(guid) }, 
+			 		interval);
+			//sendDataToServer(guid);
+		};
+
+		function sendDataToServer(guid){
+			var data = {};
+			var test = getCurrentMode();
+			if(test === 'landscape'){
+				data.vote = 1;	
+			}else{
+				data.vote = -1;
+			}
+			data.user_id = guid;
+			
+			// ajax call van data
+			$.ajax
+			  ({
+			    type: "PATCH",
+			    url: "/vote",
+			    beforeSend: function (xhr) {
+  				  xhr.setRequestHeader ("Authorization", "Basic " + btoa("admin:secret"));
+				},
+				data : JSON.stringify(data),
+				contentType : 'application/json',
+			    success: function (responseData){
+			    	console.log(responseData);
+					$( ".number" ).fadeTo( "fast" , 0.2, function() {
+					    $( ".number" ).fadeTo( "fast" , 1, function() {
+					    // Animation complete and .
+					 	});	
+					});
+			    	// update the UI - why build functions and pass data?
+					document.getElementById('countPosts').innerHTML = parseInt(responseData['votes_up']) + parseInt(responseData['votes_down']);
+					document.getElementById('countPortraits').innerHTML = responseData['votes_up'];
+					document.getElementById('countLandscapes').innerHTML = responseData['votes_down'];
+					document.getElementById('countQueue').innerHTML = responseData['queue_depth'];
+					
+			    }
+			});		
+
+			// on success set visual countposts.
+			numberOfPosts++;
+			detailedNumbers[data.mode]++;
+
+			// update the UI
+			document.getElementById('countPosts').innerHTML = numberOfPosts;
+			document.getElementById('countPortraits').innerHTML = detailedNumbers['portrait'];
+			document.getElementById('countLandscapes').innerHTML = detailedNumbers['landscape'];
+			// hell no errors are shown, who'll build them :)
+		}
+		
+		
+		window.onload = function(){	
+			
+			// set the GUID 
+			document.getElementById('guid').innerHTML = guid;
+		
+			// onload check landscape opening, default values are portrait
+			if(getCurrentMode() === 'landscape'){
+				setOrientation(90);
+			}
+			
+			// init values by calling the change function.		
+			// also triggers the first sending of data
+			changeIntervalTime();
+			
+			// DONE!
+			// about:
+			// - The eventlistener changes the view only
+			// - The button in the UI triggers the changeIntervalTime(), which will calculate the new interval, stops the current repeater, sets a new one.
+			// - The UUID is from the Cookies now :) 
+		}
+
+		// set event listener for device orientation change
+		window.addEventListener("orientationchange", function() {
+			if(getCurrentMode() === 'landscape'){
+				setOrientation(90);
+			}else{
+				setOrientation(0);
+			}
+		}, false);
+	</script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  </body>
+</html>

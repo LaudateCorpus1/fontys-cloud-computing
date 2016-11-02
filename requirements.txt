@@ -22,3 +22,4 @@ requests==2.11.1
 six==1.10.0
 Werkzeug==0.11.11
 Flask-Cors==2.1.2
+static==0.4
