@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Vote</title>
+    <title>Vote results</title>
 
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -16,7 +16,7 @@
 	<style>	
 	/* general */
 		body{
-			color:white;
+			color:#333;
 			height: 100vh;
 			background-size:contain;
 			position:relative;
@@ -26,38 +26,56 @@
 			display: inherit;
 		}
 		.content{
-			height: 54vh;
+			text-align: center;
 		}
-		.content h1{
-			margin-top:0;
+		.horizontal-bar{
+			position:relative;
+			display:block;
+			margin:30px 0 15px;
+			width:100%;
+			background:#eee;
+			height:35px;
+			border-radius:3px;
+			-moz-border-radius:3px;
+			-webkit-border-radius:3px;
+			-webkit-transition:0.4s linear;
+			-moz-transition:0.4s linear;
+			-ms-transition:0.4s linear;
+			-o-transition:0.4s linear;
+			transition:0.4s linear;
+			-webkit-transition-property:width;
+			-moz-transition-property:width;
+			-ms-transition-property:width;
+			-o-transition-property:width;
+			transition-property:width;
 		}
-		.content h3{
-			font-size: 25vw;
+		.bartitle {
+			position:absolute;
+			top:0;
+			left:0;
+			width:50%;
+			font-weight:bold;
+			font-size:13px;
+			color:#ffffff;
+			background:#6adcfa;
+			-webkit-border-radius:3px;
+			-moz-border-radius:3px;
+			border-radius:3px;
 		}
-		.bottom{
-			height: 24vh;
-			background: rgba(0,0,0,0.35);
-	    	padding: 1px 10px;
+		.right{
+			top:0;
+			right:0;
+			left:auto;
 		}
-	/* landscape */
-		.landscape{
-			background: url(landscape.jpg) center center no-repeat;
-			
-		}
-		.landscape .logo{
-			float:right;
-		}
-		.landscape .content h3{
-			font-size: 11vw;
+		.bartitle span {
+			display:block;
+			background:rgba(0, 0, 0, 0.1);
+			padding:0 20px;
+			height:35px;
+			line-height:35px;
 		}
 
-	/* portrait */	
-		.portrait{
-			background: url(portrait.jpg) center center no-repeat;
-		}
-		.portrait .payoff{
-			color:#4a2286;
-		}
+		
 
 	</style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -67,209 +85,106 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
   </head>
-  <body id="body" class="container portrait">
+
+  <body id="body" class="container">
   	<img class="logo" src="http://www.greenhousegroup.com/Content/images/ghg-logo-280-wide.png">
-    <div class="content">
-	    <h1>Cast your vote</h1>
-	    <h5 class="payoff">By changing your device orientation</h5>
-    	<h3><span id="orientation">Portrait</span> Mode</h3>
+    <div class="content row">
+	    <div class="col-md-12">
+    		<h1>Votes (<strong id="countPosts">0</strong>)</h1>
+	    	<h5 class="payoff">Vote by changing your device orientation</h5>
+	    </div>
+    	<div class="col-md-4">
+    		<h3>Portrait</h3>
+    		<h1 id="countPortraits" class="number">0</h1>
+		</div>
+		<div class="col-md-4">
+			<h3>Landscape</h3>
+			<h1 id="countLandscapes" class="number">0</h1>
+		</div>
+		<div class="col-md-4">
+			<h3>Queue</h3>
+			<h1 id="countQueue" class="number">0</h1>
+		</div>
+		<div class="col-md-12">
+			<div class="horizontal-bar">
+				<div data-percent="0%" id="percentagePortrait" class="bartitle" style="background: #6f47aa;"><span>Portrait</span></div>
+				<div data-percent="0%" id="percentageLandscape" class="bartitle right"  style="background: #049f3d;"><span>Landscape</span></div>
+			</div>
+		</div>
     </div>
-	<div class="bottom">    
-		<h5>Send to server every: <span id="intervalTime"></span></h5>
-		<button class="btn btn-primary" onclick="changeIntervalTime()">Change send to server time</button>
-		<p>Portaits : <strong id="countPortraits">0</strong><br/> Landscapes: <strong id="countLandscapes">0</strong><br/>
-			Total submitted: <strong id="countPosts">0</strong></br>
-		<small>Your Guid: <span id="guid"></span></small> </p>
-	</div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<script>
 
-		// cookie shit  1/2
-		function setCookie(cname, cvalue, exdays) {
-		    var d = new Date();
-		    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-		    var expires = "expires="+d.toUTCString();
-		    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-		}
-
-		// cookie shit  2/2
-		function getCookie(cname) {
-		    var name = cname + "=";
-		    var ca = document.cookie.split(';');
-		    for(var i = 0; i < ca.length; i++) {
-		        var c = ca[i];
-		        while (c.charAt(0) == ' ') {
-		            c = c.substring(1);
-		        }
-		        if (c.indexOf(name) == 0) {
-		            return c.substring(name.length, c.length);
-		        }
-		    }
-		    return "";
-		}
-
-		function generateUUID(){
-			// check if in cookie
-			var cookieUUID = getCookie("uuid");
-		    if (cookieUUID != "") {
-		        return cookieUUID;
-		    } else { // generate and write to cookie
-				var d = new Date().getTime();
-				if(window.performance && typeof window.performance.now === "function"){
-					d += performance.now(); //use high-precision timer if available
-				}
-				var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-					var r = (d + Math.random()*16)%16 | 0;
-					d = Math.floor(d/16);
-					return (c=='x' ? r : (r&0x3|0x8)).toString(16);
-				});
-
-				setCookie("uuid", uuid, 365);
-		    
-				return uuid;
-			}
-		}
-
-		function setOrientation(angle){	
-			if (angle == 90) { // landscape
-				var classes = document.getElementById('body').classList;
-				classes.remove('portrait');
-				classes.add('landscape');
-				document.getElementById('orientation').innerHTML = 'Landscape';	
-			}
-			else{ //portrait
-				var classes = document.getElementById('body').classList;
-			    classes.add('portrait');
-				classes.remove('landscape');
-			    document.getElementById('orientation').innerHTML = 'Portrait';	
-			}
-		}
-
-
-		// the FE changes this between 
-		function changeIntervalTime(){
-			clearInterval(intervalTime);
-			if(intervalTime == 1000 || intervalTime == 100)
-			{
-				intervalTime = intervalTime/10	
-			}
-			else{
-				intervalTime = 1000
-			}
-			document.getElementById('intervalTime').innerHTML = '' + intervalTime/1000 + ' seconds' ;	
-			sendData(intervalTime);
-		}
-
-		function getCurrentMode(){
-			var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
-			var height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
-
-			var isLandscapeMode = width > height;
-				if(isLandscapeMode){
-					return 'landscape'; // or something else
-				}else{
-					return 'portrait';
-				}
-		}
 		// set some dirty vars
-		var sendPeriodic;			// #ID needed for stopping/starting the setInterval when update
-		var numberOfPosts = 0;		// needed in the UI
-		var detailedNumbers = {
-			'landscape':0,
-			'portrait':0
-		};	// split submits
-		var guid = generateUUID();	// Generate it once and set cookie
-		var intervalTime = 123456;	// Start with a second, so pass an invalid number :)
+		var interval = 5000;	// Interval
+		var sendPeriodic; 		// needs to be initialized
 		// end of vars
 
-		function sendData(interval){
+		function getData(){
 			// stop the former interval
 			clearInterval(sendPeriodic);
 			// Start new with sending
-			 sendPeriodic = setInterval(
-			 	function(){ sendDataToServer(guid) }, 
-			 		interval);
-			//sendDataToServer(guid);
+			sendPeriodic = setInterval(
+				function(){ getDataFromServer() }, 
+					interval);
 		};
+		function updateUi(responseData){
 
-		function sendDataToServer(guid){
-			var data = {};
-			var test = getCurrentMode();
-			if(test === 'landscape'){
-				data.vote = 1;	
-			}else{
-				data.vote = -1;
-			}
-			data.user_id = guid;
+			jQuery( ".number" ).fadeTo( "fast" , 0.2, function() {
+			    jQuery( ".number" ).fadeTo( "fast" , 1, function() {
+			    // Animation complete and... amazing pulse happend.
+			 	});	
+			});
+
+	    	// set vars for better understanding of calculations/rules below
+	    	var total = parseInt(responseData['votes_up']) + parseInt(responseData['votes_down']);
+	    	var portrait = responseData['votes_up'];
+	    	var landscape = responseData['votes_down'];
+			var queue = responseData['queue_depth'];
 			
+			// testdata
+			total = 30;
+			portrait = 13;
+			landscape = 17;
+
+			if(total >= 0){
+				document.getElementById('countPosts').innerHTML = total;
+				document.getElementById('countPortraits').innerHTML = portrait;
+				document.getElementById('countLandscapes').innerHTML = landscape;
+				document.getElementById('countQueue').innerHTML = queue;
+				
+				jQuery('#percentageLandscape').animate({
+					width:100*landscape/total+'%'
+				},300);
+				jQuery('#percentagePortrait').animate({
+					width:100*portrait/total+'%'
+				},300);
+			}
+		} 
+		function getDataFromServer(){
 			// ajax call van data
 			$.ajax
 			  ({
-			    type: "PATCH",
-			    url: "/vote",
+			    type: "GET",
+			    url: "https://fontys-voting.herokuapp.com/dashboard",
 			    beforeSend: function (xhr) {
   				  xhr.setRequestHeader ("Authorization", "Basic " + btoa("admin:secret"));
 				},
-				data : JSON.stringify(data),
-				contentType : 'application/json',
 			    success: function (responseData){
-			    	console.log(responseData);
-					$( ".number" ).fadeTo( "fast" , 0.2, function() {
-					    $( ".number" ).fadeTo( "fast" , 1, function() {
-					    // Animation complete and .
-					 	});	
-					});
-			    	// update the UI - why build functions and pass data?
-					document.getElementById('countPosts').innerHTML = parseInt(responseData['votes_up']) + parseInt(responseData['votes_down']);
-					document.getElementById('countPortraits').innerHTML = responseData['votes_up'];
-					document.getElementById('countLandscapes').innerHTML = responseData['votes_down'];
-					document.getElementById('countQueue').innerHTML = responseData['queue_depth'];
-					
+			    	updateUi(responseData);
 			    }
-			});		
-
-			// on success set visual countposts.
-			numberOfPosts++;
-			detailedNumbers[data.mode]++;
-
-			// update the UI
-			document.getElementById('countPosts').innerHTML = numberOfPosts;
-			document.getElementById('countPortraits').innerHTML = detailedNumbers['portrait'];
-			document.getElementById('countLandscapes').innerHTML = detailedNumbers['landscape'];
-			// hell no errors are shown, who'll build them :)
+			});	
 		}
 		
 		
 		window.onload = function(){	
 			
-			// set the GUID 
-			document.getElementById('guid').innerHTML = guid;
-		
-			// onload check landscape opening, default values are portrait
-			if(getCurrentMode() === 'landscape'){
-				setOrientation(90);
-			}
-			
-			// init values by calling the change function.		
-			// also triggers the first sending of data
-			changeIntervalTime();
-			
+			getData(); // incl interval
+			//getDataFromServer(); // direct call 1 time
 			// DONE!
-			// about:
-			// - The eventlistener changes the view only
-			// - The button in the UI triggers the changeIntervalTime(), which will calculate the new interval, stops the current repeater, sets a new one.
-			// - The UUID is from the Cookies now :) 
-		}
 
-		// set event listener for device orientation change
-		window.addEventListener("orientationchange", function() {
-			if(getCurrentMode() === 'landscape'){
-				setOrientation(90);
-			}else{
-				setOrientation(0);
-			}
-		}, false);
+		}
 	</script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
