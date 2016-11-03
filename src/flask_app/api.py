@@ -46,6 +46,8 @@ class Dashboard(Resource):
         status = dict(
             votes_up=votes_up,
             votes_down=votes_down,
+            portrait=votes_up,
+            landscape=votes_down,
             queue_depth=get_tasks_in_queue(os.environ['AMQP_URL']),
             votes_processed=count
         )
