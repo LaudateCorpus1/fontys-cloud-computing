@@ -138,9 +138,9 @@
 			});
 
 	    	// set vars for better understanding of calculations/rules below
-	    	var total = parseInt(responseData['votes_up']) + parseInt(responseData['votes_down']);
-	    	var portrait = responseData['votes_up'];
-	    	var landscape = responseData['votes_down'];
+	    	var total = parseInt(responseData['landscape']) + parseInt(responseData['portrait']);
+	    	var portrait = responseData['portrait'];
+	    	var landscape = responseData['landscape'];
 			var queue = responseData['queue_depth'];
 			
 			// testdata
