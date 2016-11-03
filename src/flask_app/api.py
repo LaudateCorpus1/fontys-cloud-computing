@@ -40,11 +40,14 @@ class Dashboard(Resource):
               last_update >= NOW() - INTERVAL '15 minutes'
               """)
             votes_up, votes_down = cursor.fetchone()
+            cursor.execute("""SELECT SUM(count) FROM votes""")
+            count, = cursor.fetchone()
 
         status = dict(
             votes_up=votes_up,
             votes_down=votes_down,
-            queue_depth=get_tasks_in_queue(os.environ['AMQP_URL'])
+            queue_depth=get_tasks_in_queue(os.environ['AMQP_URL']),
+            votes_processed=count
         )
         return status
 
