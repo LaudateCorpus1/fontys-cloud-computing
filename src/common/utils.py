@@ -75,3 +75,5 @@ def db_cursor():
     finally:
         connection.commit()
         connection.close()
+
+

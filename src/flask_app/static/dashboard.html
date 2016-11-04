@@ -152,7 +152,7 @@
             updateElem('countQueue', data['queue_depth']);
         }
 
-        function runUpdateLoop(url) {
+        function runUpdateLoop(url, interval) {
             var pending = false;
 
             function fetch() {
@@ -171,7 +171,7 @@
                 });
             }
 
-            setInterval(fetch, 500);
+            setInterval(fetch, interval);
         }
 
         window.onload = function() {
