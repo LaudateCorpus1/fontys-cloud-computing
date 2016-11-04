@@ -166,7 +166,7 @@
             var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
             var height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
 
-            alert('width='+width+',height='+height);
+            //alert('width='+width+',height='+height);
             var isLandscapeMode = width > height;
                 if(isLandscapeMode){
                     return 'landscape'; // or something else
@@ -251,6 +251,7 @@
 
         // set event listener for device orientation change
         window.addEventListener("orientationchange", function() {
+            alert('getCurrentMode='+getCurrentMode());
             if(getCurrentMode() === 'landscape'){
                 setOrientation(90);
             }else{
