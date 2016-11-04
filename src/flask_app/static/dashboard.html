@@ -25,6 +25,9 @@
             position:relative;
             font-family: 'Roboto', sans-serif;
         }
+	.title {
+	    font-size: 100px;
+	}
         .caption {
             font-size: 40px;
         }
@@ -101,13 +104,16 @@
     <img class="logo" src="http://www.greenhousegroup.com/Content/images/ghg-logo-280-wide.png">
     <div class="content row">
         <div class="col-md-12">
-            <h1 class="caption">Voting Dashboard</h1>
+            <h1 class="title">Voting Dashboard</h1>
         </div>
-        <div class="col-md-12">
-            <h1>Cast your vote on <a>https://goo.gl/wQq22b</a></h1>
+        
+	<div class="col-md-12">
+            <div class="caption">Cast your vote on: <a>https://goo.gl/wQq22b</a></div>
 
+            <img src="qr-fontys-voting.png"/>
         </div>
-        <div class="col-md-6 stat">
+        
+	<div class="col-md-6 stat">
             <div class="caption">Portrait</div>
             <div id="countPortraits" class="number">0</div>
         </div>
@@ -115,17 +121,7 @@
             <div class="caption">Landscape</div>
             <div id="countLandscapes" class="number">0</div>
         </div>
-        <!-- <div class="col-md-4"> -->
-        <!--     <div class="caption">Queue</div> -->
-        <!--     <div id="countQueue" class="number">0</div> -->
-        <!-- </div> -->
 
-        <!-- <div class="col-md-12"> -->
-        <!--     <div class="horizontal-bar"> -->
-        <!--         <div data-percent="0%" id="percentagePortrait" class="bartitle" style="background: #6f47aa;"><span>Portrait</span></div> -->
-        <!--         <div data-percent="0%" id="percentageLandscape" class="bartitle right"  style="background: #049f3d;"><span>Landscape</span></div> -->
-        <!--     </div> -->
-        <!-- </div> -->
         <div class="col-md-6">
             <div class="caption"># Processed</div>
             <div id="countProcessed" class="number">0</div>
@@ -140,50 +136,34 @@
     <script>
 
         // set some dirty vars
-        var interval = 1000;    // Interval
+        var interval = 500;    // Interval
         var sendPeriodic;       // needs to be initialized
+	var pending = false;
         // end of vars
 
         function getData(){
             // stop the former interval
             clearInterval(sendPeriodic);
             // Start new with sending
-            sendPeriodic = setInterval(
-                function(){ getDataFromServer() },
-                    interval);
+            sendPeriodic = setInterval( function() { getDataFromServer(); }, interval);
         };
         function updateUi(responseData){
-
-        //    jQuery( ".number" ).fadeTo( "fast" , 0.2, function() {
-        //        jQuery( ".number" ).fadeTo( "fast" , 1, function() {
-        //        // Animation complete and... amazing pulse happend.
-        //        });
-        //    });
-
-            // set vars for better understanding of calculations/rules below
-            var total = parseInt(responseData['landscape']) + parseInt(responseData['portrait']);
             var portrait = responseData['portrait'];
             var landscape = responseData['landscape'];
-        var queue = responseData['queue_depth'];
-        var processed = responseData['votes_processed'];
+	    var queue = responseData['queue_depth'];
+	    var processed = responseData['votes_processed'];
 
-            // testdata
-
-            if(total >= 0){
-                document.getElementById('countPortraits').innerHTML = portrait;
-                document.getElementById('countLandscapes').innerHTML = landscape;
-                document.getElementById('countQueue').innerHTML = queue;
-                document.getElementById('countProcessed').innerHTML = processed;
-
-                jQuery('#percentageLandscape').animate({
-                    width:100*landscape/total+'%'
-                },300);
-                jQuery('#percentagePortrait').animate({
-                    width:100*portrait/total+'%'
-                },300);
-            }
+            document.getElementById('countPortraits').innerHTML = portrait;
+            document.getElementById('countLandscapes').innerHTML = landscape;
+            document.getElementById('countQueue').innerHTML = queue;
+            document.getElementById('countProcessed').innerHTML = processed;
         }
-        function getDataFromServer(){
+        function getDataFromServer() {
+	    if (pending) {
+		return;
+	    }
+	    pending = true;
+
             // ajax call van data
             $.ajax
               ({
@@ -194,17 +174,16 @@
                 },
                 success: function (responseData){
                     updateUi(responseData);
-                }
+                },
+		complete: function(data) {
+		    pending = false;
+		}
             });
         }
 
-
         window.onload = function(){
-
-            getData(); // incl interval
-            //getDataFromServer(); // direct call 1 time
-            // DONE!
-
+	    getDataFromServer();
+            getData(); 
         }
     </script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
