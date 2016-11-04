@@ -25,9 +25,9 @@
             position:relative;
             font-family: 'Roboto', sans-serif;
         }
-	.title {
-	    font-size: 60px;
-	}
+    .title {
+        font-size: 60px;
+    }
         .caption {
             font-size: 40px;
         }
@@ -106,14 +106,14 @@
         <div class="col-md-12">
             <h1 class="title">Voting Dashboard</h1>
         </div>
-        
-	    <div class="col-md-12">
+
+        <div class="col-md-12">
             <div class="caption">Cast your vote on: <a>https://goo.gl/wQq22b</a></div>
 
             <img src="qr-fontys-voting.png"/>
         </div>
-        
-	    <div class="col-md-6 stat">
+
+        <div class="col-md-6 stat">
             <div class="caption">Portrait</div>
             <div id="countPortraits" class="number">0</div>
         </div>
@@ -135,50 +135,151 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script>
 
-	    function addAuth(xhr) {
-	        xhr.setRequestHeader('Authorization', 'Basic ' + btoa('admin:secret'))
-	    }
+    function updateNumber(id, value) {
+        document.getElementById(id).innerHtml = value;
+        document.getElementById(id).innerHtml = 'Yo';
+    }
 
-        function updateElem(n, value) {
-            if (value) {
-                document.getElementById(n).innerHTML = value;
+    function addAuth(xhr) {
+        xhr.setRequestHeader('Authorization', 'Basic ' + btoa('admin:secret'))
+    }
+
+    function runQueueDepth() {
+        var pending = false;
+        var interval = 500;
+
+        function start() {
+            getData();
+            setInterval(getData, interval);
+        };
+
+        function getData() {
+            if (pending) {
+                return;
             }
-        }
-
-        function updateUi(data){
-            updateElem('countProcessed', data['votes_processed']);
-            updateElem('countLandscapes', data['landscape']);
-            updateElem('countPortraits', data['portrait']);
-            updateElem('countQueue', data['queue_depth']);
-        }
-
-        function runUpdateLoop(url) {
-            var pending = false;
-
-            function fetch() {
-                if (pending) {
-                    return;
+            pending = true;
+            $.ajax({
+                type: 'GET',
+                url: '/queue-depth',
+                beforeSend: addAuth,
+                success: function(data) {
+                    var queue_depth = data['queue_depth'];
+                    updateNumber('countQueue', queue_depth);
+                },
+                complete: function(data) {
+                    pending = false;
                 }
-                pending = true;
-                $.ajax({
-                    type: 'GET',
-                    url: url,
-                    beforeSend: addAuth,
-                    success: updateUi,
-                    complete: function(data) {
-                        pending = false;
-                    }
-                });
+            })
+        };
+
+        start();
+    }
+
+    function runStats() {
+        var pending = false;
+        var interval = 500;
+
+        function start() {
+            getData();
+            setInterval(getData, interval);
+        };
+
+        function getData() {
+            if (pending) {
+                return;
             }
+            pending = true;
+            $.ajax({
+                type: 'GET',
+                url: '/stats',
+                beforeSend: addAuth,
+                success: function(data) {
+                    console.log(data);
+                    console.log(document.getElementById('countProcessed'));
+                    console.log(document.getElementById('countProcessed').innerHtml);
+                    document.getElementById('countProcessed').innerHtml = 5432;
+            //        updateNumber('countPortraits', data['portrait']);
+            //        updateNumber('countLandscapes', data['landscape']);
+            //        updateNumber('countProcessed', data['processed']);
+                },
+                complete: function(data) {
+                    pending = false;
+                }
+            });
+        }
+        start();
+    };
 
-            setInterval(fetch, 500);
+    window.onload = function() {
+        //runStats();
+        runQueueDepth();
+    }
+
+
+        // set some dirty vars
+        var interval = 500;    // Interval
+        var sendPeriodic;       // needs to be initializedi
+        var pending = false;
+        // end of vars
+
+        function getData(){
+            // stop the former interval
+            clearInterval(sendPeriodic);
+            // Start new with sending
+            sendPeriodic = setInterval( function() { getDataFromServer(); }, interval);
+        };
+        function updateUi(responseData){
+            var portrait = responseData['portrait'];
+            var landscape = responseData['landscape'];
+        var queue = responseData['queue_depth'];
+        var processed = responseData['votes_processed'];
+
+            document.getElementById('countPortraits').innerHTML = portrait;
+            document.getElementById('countLandscapes').innerHTML = landscape;
+            //document.getElementById('countQueue').innerHTML = queue;
+            document.getElementById('countProcessed').innerHTML = processed;
+        }
+        function getQueueDepth() {
+            $.ajax({
+                type: 'GET',
+                url: '/queue-depth',
+                beforeSend: addAuth,
+                success: function(data) {
+                    var queue_depth = data['queue_depth'];
+                    document.getElementById('countQueue').innerHtml = queue_depth;
+                },
+                complete: function(data) {
+                }
+            })
+        }
+        function getDataFromServer() {
+        if (pending) {
+            return;
+        }
+        pending = true;
+
+            // ajax call van data
+            $.ajax
+              ({
+                type: "GET",
+                url: "/dashboard",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader ("Authorization", "Basic " + btoa("admin:secret"));
+                },
+                success: function (responseData){
+                    updateUi(responseData);
+                },
+            complete: function(data) {
+            pending = false;
+        }
+            });
         }
 
-        window.onload = function() {
-            runUpdateLoop('/stats', 500);
-            runUpdateLoop('/queue-depth', 1000);
+        window.onload = function(){
+        getDataFromServer();
+            getData();
         }
-        
+
 
     </script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->

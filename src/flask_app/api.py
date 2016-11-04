@@ -4,8 +4,8 @@ import os
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
-
 from flask_app.auth import requires_auth
+
 from worker.tasks import process_vote
 from common.utils import get_tasks_in_queue, db_cursor
 
@@ -25,7 +25,7 @@ class Vote(Resource):
         )
 
 
-class Dashboard(Resource):
+class Stats(Resource):
     decorators = [requires_auth]
 
     def get(self):
@@ -46,8 +46,19 @@ class Dashboard(Resource):
         status = dict(
             landscape=landscape,
             portrait=portrait,
-            queue_depth=get_tasks_in_queue(os.environ['AMQP_URL']),
+            #queue_depth=get_tasks_in_queue(os.environ['AMQP_URL']),
+            queue_depth=0,
             votes_processed=count
+        )
+        return status
+
+class QueueDepth(Resource):
+    decorators = [requires_auth]
+
+    def get(self):
+        url = os.environ['AMQP_URL']
+        status = dict(
+            queue_depth=get_tasks_in_queue(url)
         )
         return status
 
@@ -56,7 +67,9 @@ app = Flask(__name__)
 api = Api(app)
 
 api.add_resource(Vote, '/vote')
-api.add_resource(Dashboard, '/dashboard')
+api.add_resource(Stats, '/stats')
+api.add_resource(QueueDepth, '/queue-depth')
+
 
 CORS(app,
      resources={r"/*": {"origins": "*"}},
