@@ -161,16 +161,18 @@
             sendData(intervalTime);
         }
 
-        function getCurrentMode(){
+         function getCurrentMode(){
+
             var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
             var height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
 
+            alert('width='+width+',height='+height);
             var isLandscapeMode = width > height;
                 if(isLandscapeMode){
                     return 'landscape'; // or something else
                 }else{
                     return 'portrait';
-                }
+            }
         }
         // set some dirty vars
         var sendPeriodic;           // #ID needed for stopping/starting the setInterval when update

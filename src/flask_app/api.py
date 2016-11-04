@@ -32,22 +32,20 @@ class Dashboard(Resource):
         with db_cursor() as cursor:
             cursor.execute("""
             SELECT
-              coalesce(SUM(CAST(vote=1 as integer)), 0) as up_votes,
-              coalesce(SUM(CAST(vote=-1 as integer)), 0) as down_votes
+              coalesce(SUM(CAST(vote=1 as integer)), 0) as landscape,
+              coalesce(SUM(CAST(vote=-1 as integer)), 0) as portrait
             FROM
               votes
             WHERE
               last_update >= NOW() - INTERVAL '15 minutes'
               """)
-            votes_up, votes_down = cursor.fetchone()
+            landscape, portrait = cursor.fetchone()
             cursor.execute("""SELECT SUM(count) FROM votes""")
             count, = cursor.fetchone()
 
         status = dict(
-            votes_up=votes_up,
-            votes_down=votes_down,
-            portrait=votes_up,
-            landscape=votes_down,
+            landscape=landscape,
+            portrait=portrait,
             queue_depth=get_tasks_in_queue(os.environ['AMQP_URL']),
             votes_processed=count
         )

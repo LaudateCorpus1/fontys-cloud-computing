@@ -50,8 +50,8 @@ def get_tasks_in_queue(amqp_url, queue_name='celery'):
         url,
         auth=HTTPBasicAuth(username, password), verify=True).json()
 
-    return queue['messages'] - queue['messages_unacknowledged']
-
+    #return queue['messages'] - queue['messages_unacknowledged']
+    return queue['messages']
 
 @contextmanager
 def db_cursor():
