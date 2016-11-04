@@ -136,7 +136,7 @@
     <script>
 
         // set some dirty vars
-        var interval = 5000;    // Interval
+        var interval = 1000;    // Interval
         var sendPeriodic;       // needs to be initialized
         // end of vars
 
@@ -150,11 +150,11 @@
         };
         function updateUi(responseData){
 
-            jQuery( ".number" ).fadeTo( "fast" , 0.2, function() {
-                jQuery( ".number" ).fadeTo( "fast" , 1, function() {
-                // Animation complete and... amazing pulse happend.
-                });
-            });
+        //    jQuery( ".number" ).fadeTo( "fast" , 0.2, function() {
+        //        jQuery( ".number" ).fadeTo( "fast" , 1, function() {
+        //        // Animation complete and... amazing pulse happend.
+        //        });
+        //    });
 
             // set vars for better understanding of calculations/rules below
             var total = parseInt(responseData['landscape']) + parseInt(responseData['portrait']);
