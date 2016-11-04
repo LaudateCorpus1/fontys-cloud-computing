@@ -250,8 +250,8 @@
         }
 
         // set event listener for device orientation change
-        window.addEventListener("orientationchange", function() {
-            alert('getCurrentMode='+getCurrentMode());
+        window.addEventListener("resize", function() {
+            //alert('getCurrentMode='+getCurrentMode());
             if(getCurrentMode() === 'landscape'){
                 setOrientation(90);
             }else{
