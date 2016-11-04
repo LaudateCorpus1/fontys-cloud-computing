@@ -46,8 +46,6 @@ class Stats(Resource):
         status = dict(
             landscape=landscape,
             portrait=portrait,
-            #queue_depth=get_tasks_in_queue(os.environ['AMQP_URL']),
-            queue_depth=0,
             votes_processed=count
         )
         return status
