@@ -196,9 +196,10 @@
         function sendDataToServer(guid){
             var data = {};
             var test = getCurrentMode();
+            data.mode = test;
             if(test === 'landscape'){
                 data.vote = 1;
-            }else{
+             }else{
                 data.vote = -1;
             }
             data.user_id = guid;
@@ -214,31 +215,14 @@
                 data : JSON.stringify(data),
                 contentType : 'application/json',
                 success: function (responseData){
-                    console.log(responseData);
-                    $( ".number" ).fadeTo( "fast" , 0.2, function() {
-                        $( ".number" ).fadeTo( "fast" , 1, function() {
-                        // Animation complete and .
-                        });
-                    });
                     // update the UI - why build functions and pass data?
                     numberOfPosts++;
-                    document.getElementById('countPosts').innerHTML = parseInt(responseData['votes_up']) + parseInt(responseData['votes_down']);
-                    document.getElementById('countPortraits').innerHTML = responseData['votes_up'];
-                    document.getElementById('countLandscapes').innerHTML = responseData['votes_down'];
-                    document.getElementById('countQueue').innerHTML = responseData['queue_depth'];
-
+                    detailedNumbers[data.mode]++;
+                    document.getElementById('countPosts').innerHTML = numberOfPosts;
+                    document.getElementById('countPortraits').innerHTML = detailedNumbers['portrait'];
+                    document.getElementById('countLandscapes').innerHTML = detailedNumbers['landscape'];
                 }
             });
-
-            // on success set visual countposts.
-
-            detailedNumbers[data.mode]++;
-
-            // update the UI
-//          document.getElementById('countPosts').innerHTML = numberOfPosts;
-//          document.getElementById('countPortraits').innerHTML = detailedNumbers['portrait'];
-//          document.getElementById('countLandscapes').innerHTML = detailedNumbers['landscape'];
-            // hell no errors are shown, who'll build them :)
         }
 
 
