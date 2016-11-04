@@ -140,7 +140,7 @@
 	    }
 
         function updateElem(n, value) {
-            if (value) {
+            if (value !== undefined) {
                 document.getElementById(n).innerHTML = value;
             }
         }
