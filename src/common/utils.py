@@ -42,6 +42,9 @@ def get_tasks_in_queue(amqp_url, queue_name='celery'):
         # special case
         url = 'http://{host}:55672/api/queues/{vhost}/{queue_name}'.format(
             host=host, vhost=vhost, queue_name=queue_name)
+    elif host in ['192.168.99.100', '52.209.1.102']:
+        url = 'http://{host}:15672/api/queues/{vhost}/{queue_name}'.format(
+            host=host, vhost=vhost, queue_name=queue_name)
     else:
         url = 'https://{host}/api/queues/{vhost}/{queue_name}'.format(
             host=host, vhost=vhost, queue_name=queue_name)
