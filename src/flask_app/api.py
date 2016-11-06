@@ -40,7 +40,7 @@ class Stats(Resource):
               last_update >= NOW() - INTERVAL '15 minutes'
               """)
             landscape, portrait = cursor.fetchone()
-            cursor.execute("""SELECT SUM(count) FROM votes""")
+            cursor.execute("""SELECT coaelsce(SUM(count), 0) FROM votes""")
             count, = cursor.fetchone()
 
         status = dict(
